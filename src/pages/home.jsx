@@ -5,17 +5,21 @@ import {
 import { collection } from 'firebase/firestore';
 import { useState } from 'react';
 import Todos from '../components/Todos';
-import { firestore } from '../firebase';
+import { firestore, storage } from '../firebase';
+import { ref, uploadBytes } from "firebase/storage";
+import { map } from '@firebase/util';
+
 
 const Home = () => {
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState('');
+  const [uploadedFile, setUploadedFile] = useState([])
 
-  const ref = collection(firestore, 'todos');
+  const refTodos = collection(firestore, 'todos');
 
-  const firestoreQuery = useFirestoreQuery(['todos'], ref);
-  const mutationCreateTodo = useFirestoreCollectionMutation(ref);
+  const firestoreQuery = useFirestoreQuery(['todos'], refTodos);
+  const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
 
   const handleTodo = async e => {
     e.preventDefault();
@@ -27,6 +31,13 @@ const Home = () => {
     });
     await firestoreQuery.refetch();
   };
+
+  const onFileUpload = async (e) => {
+    if (uploadedFile === null) return;
+  
+    Array.from(uploadedFile).forEach(file => {  let fileRef = ref(storage, `files/${file.name + new Date()}`)
+    uploadBytes(fileRef, file) });
+  }
 
   return (
     <div>
@@ -60,7 +71,8 @@ const Home = () => {
             <button type="submit" disabled={mutationCreateTodo.isLoading}>
               Save to-do
             </button>
-            <input type="file" multiple />
+            <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
+            <button type='button' onClick={onFileUpload}>Uppload file</button>
           </div>
         </form>
         <div>
