@@ -4,9 +4,11 @@ import {
   useFirestoreDocumentMutation,
 } from '@react-query-firebase/firestore';
 import { collection, doc } from 'firebase/firestore';
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import { isDayExpired } from '../helpers';
-import { firestore } from '../firebase';
+import { firestore, storage } from '../firebase';
+import { ref, getDownloadURL, listAll } from "firebase/storage";
+
 
 const TodoCard = ({ data, id }) => {
   const deleteFrom = collection(firestore, 'todos');
@@ -35,6 +37,40 @@ const TodoCard = ({ data, id }) => {
     setType('view');
   };
 
+  const ListAll = (id) => {
+    // const storageRef = storage().ref()
+    // let listRef = storageRef.child(id)
+
+    // listRef.ListAll().then((res) => {
+    //   res.items.forEach((itemRef) => {
+    //     itemRef.getDownloadURL().then((url) => {
+    //       console.log('URL', url)
+    //     });
+    //   });
+    // })
+    // .catch((error) => {
+    //   console.log('error', error)
+    // })
+
+    const listRef = ref(storage, data.id);
+
+    listAll(listRef)
+      .then((res) => {
+        res.prefixes.forEach((folderRef) => {
+          // All the prefixes under listRef.
+          // You may call listAll() recursively on them.
+        });
+        res.items.forEach((itemRef) => {
+              getDownloadURL(itemRef).then((url) => {
+                console.log('URL', url)
+              });
+            });
+      }).catch((error) => {
+        console.log('error', error)
+      });
+
+  }
+
   return (
     <div>
       {type === 'view' ? (
@@ -61,6 +97,15 @@ const TodoCard = ({ data, id }) => {
               </p>
             </div>
             <p className="Desc">{data.desc}</p>
+            <div className='Files'>
+            {/* {data.files.map((file) => {
+              const fileRef = ref(storage, file)
+              getDownloadURL(fileRef).then((url) => {
+              console.log(url);
+             });
+            })} */}
+            {ListAll(id)}
+            </div>
           </div>
           <div className="Actions">
             <button

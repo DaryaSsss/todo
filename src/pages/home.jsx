@@ -6,8 +6,8 @@ import { collection } from 'firebase/firestore';
 import { useState } from 'react';
 import Todos from '../components/Todos';
 import { firestore, storage } from '../firebase';
-import { ref, uploadBytes } from "firebase/storage";
-import { map } from '@firebase/util';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { generatePushID } from '../helpers';
 
 
 const Home = () => {
@@ -15,6 +15,8 @@ const Home = () => {
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState('');
   const [uploadedFile, setUploadedFile] = useState([])
+  const [files, setFiles] = useState([])
+
 
   const refTodos = collection(firestore, 'todos');
 
@@ -22,21 +24,41 @@ const Home = () => {
   const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
 
   const handleTodo = async e => {
+    // const ID = generatePushID();
+    const ID = generatePushID();
+    onFileUpload({ID});
     e.preventDefault();
-    await mutationCreateTodo.mutate({
+
+    // files.map((file) => {
+    //   console.log(file)
+    //   const fileRef = ref(storage, file)
+    //   getDownloadURL(fileRef).then((url) => {
+    //     filesUrls.push(url)
+    //   });
+    // })
+    mutationCreateTodo.mutate({
       name,
       desc,
       date,
       isDone: false,
+      files,
+      id:ID
     });
     await firestoreQuery.refetch();
   };
 
-  const onFileUpload = async (e) => {
+  const onFileUpload = ({ID}) => {
     if (uploadedFile === null) return;
   
-    Array.from(uploadedFile).forEach(file => {  let fileRef = ref(storage, `files/${file.name + new Date()}`)
-    uploadBytes(fileRef, file) });
+    Array.from(uploadedFile).forEach(async file => {  
+    const fileRef = ref(storage, `/${ID}/${file.name + new Date()}`)
+    uploadBytes(fileRef, file)
+    setFiles(current => [...current, fileRef.fullPath])
+    
+    // getDownloadURL(fileRef).then((url) => {
+    //   console.log(url);
+    //   });
+    });
   }
 
   return (
@@ -68,11 +90,11 @@ const Home = () => {
               onChange={e => setDate(e.currentTarget.value)}
               required
             />
+            <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
+            {/* <button type='button' onClick={onFileUpload}>Uppload file</button> */}
             <button type="submit" disabled={mutationCreateTodo.isLoading}>
               Save to-do
             </button>
-            <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
-            <button type='button' onClick={onFileUpload}>Uppload file</button>
           </div>
         </form>
         <div>
