@@ -15,10 +15,10 @@ const TodoCard = ({ data, id }) => {
 
   const [type, setType] = useState('view');
 
-  const [name, setName] = useState('');
-  const [desc, setDesc] = useState('');
-  const [date, setDate] = useState('');
-  const [isDone, setIsDone] = useState('');
+  const [name, setName] = useState(data.name);
+  const [desc, setDesc] = useState(data.desc);
+  const [date, setDate] = useState(data.date);
+  const [isDone, setIsDone] = useState(data.isDone);
 
   const updateWhere = collection(firestore, 'todos');
   const refUpdate = doc(updateWhere, id);
@@ -27,6 +27,7 @@ const TodoCard = ({ data, id }) => {
   const handleTodo = async e => {
     e.preventDefault();
     await mutationUpdateTodo.mutate({
+      isDone,
       name,
       desc,
       date,
@@ -42,15 +43,19 @@ const TodoCard = ({ data, id }) => {
             <div className="CardHeader">
               <input
                 type="checkbox"
-                checked={data.isDone}
-                value={isDone}
+                checked={isDone}
                 onChange={() => {
+                  const newIsDone = !isDone
+                  setIsDone(newIsDone)
                   mutationUpdateTodo.mutate({
-                    isDone,
+                    isDone: newIsDone,
+                    name: data.name,
+                    desc: data.desc,
+                    date: data.date,
                   });
                 }}
               />
-              <p className={!data.isDone ? 'Name' : 'Name Done'}>{data.name}</p>
+              <p className={!isDone ? 'Name' : 'Name Done'}>{data.name}</p>
               <p className={!isDayExpired(data.date) ? 'Date' : 'Date Expired'}>
                 {dayjs(data.date).format('DD/MM/YYYY')}
               </p>
@@ -83,19 +88,18 @@ const TodoCard = ({ data, id }) => {
           <div className="Card">
             <div className="Info">
               <div className="CardHeader">
-                <input type="checkbox" checked={data.isDone} />
                 <input
                   type="text"
                   maxLength={32}
                   value={name}
-                  placeholder={data.name}
+                  placeholder="Title"
                   onChange={e => setName(e.currentTarget.value)}
                   required
                 />
                 <input
                   type="date"
                   value={date}
-                  placeholder={dayjs(data.date).format('YYYY/MM/DD')}
+                  placeholder="Date"
                   onChange={e => setDate(e.currentTarget.value)}
                   required
                 />
@@ -103,7 +107,7 @@ const TodoCard = ({ data, id }) => {
               <textarea
                 rows={5}
                 value={desc}
-                placeholder={data.desc}
+                placeholder="Description"
                 onChange={e => setDesc(e.currentTarget.value)}
                 required
               />

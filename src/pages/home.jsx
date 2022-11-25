@@ -23,6 +23,7 @@ const Home = () => {
       name,
       desc,
       date,
+      isDone: false,
     });
     await firestoreQuery.refetch();
   };
