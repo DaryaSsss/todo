@@ -4,10 +4,11 @@ import {
   useFirestoreDocumentMutation,
 } from '@react-query-firebase/firestore';
 import { collection, doc } from 'firebase/firestore';
-import { useReducer, useState } from 'react';
+import { useReducer, useState, useMemo, useEffect } from 'react';
 import { isDayExpired } from '../helpers';
 import { firestore, storage } from '../firebase';
-import { ref, getDownloadURL, listAll } from "firebase/storage";
+import { ref, getDownloadURL, listAll, deleteObject,uploadBytes } from "firebase/storage";
+import { IconX } from '@tabler/icons';
 
 
 const TodoCard = ({ data, id }) => {
@@ -21,6 +22,8 @@ const TodoCard = ({ data, id }) => {
   const [desc, setDesc] = useState(data.desc);
   const [date, setDate] = useState(data.date);
   const [isDone, setIsDone] = useState(data.isDone);
+  const [uploadedFile, setUploadedFile] = useState([])
+
 
   const updateWhere = collection(firestore, 'todos');
   const refUpdate = doc(updateWhere, id);
@@ -28,48 +31,50 @@ const TodoCard = ({ data, id }) => {
 
   const handleTodo = async e => {
     e.preventDefault();
+    onFileUpload()
     await mutationUpdateTodo.mutate({
       isDone,
       name,
       desc,
       date,
+      id: data.id,
     });
     setType('view');
   };
 
-  const ListAll = (id) => {
-    // const storageRef = storage().ref()
-    // let listRef = storageRef.child(id)
+  const [files, setFiles] = useState([])
 
-    // listRef.ListAll().then((res) => {
-    //   res.items.forEach((itemRef) => {
-    //     itemRef.getDownloadURL().then((url) => {
-    //       console.log('URL', url)
-    //     });
-    //   });
-    // })
-    // .catch((error) => {
-    //   console.log('error', error)
-    // })
+  useEffect(() => {
+    const getFiles = async () => {
+      const returnList = []
+      const listRef = ref(storage, data.id);
+      const response = await listAll(listRef)
+      for (const itemRef of response.items) {
+        const url = await getDownloadURL(itemRef)
+        returnList.push({ children: itemRef.name, href: url })
+      }
+      setFiles(returnList)
+    }
+    getFiles()
+  }, [])
 
-    const listRef = ref(storage, data.id);
-
-    listAll(listRef)
-      .then((res) => {
-        res.prefixes.forEach((folderRef) => {
-          // All the prefixes under listRef.
-          // You may call listAll() recursively on them.
-        });
-        res.items.forEach((itemRef) => {
-              getDownloadURL(itemRef).then((url) => {
-                console.log('URL', url)
-              });
-            });
-      }).catch((error) => {
-        console.log('error', error)
-      });
-
+  const handleFileDelete = (fileName) => {
+    const fileRef = ref(storage, `${data.id}/${fileName}`);
+    deleteObject(fileRef)
   }
+
+  console.log(data.id, id)
+
+  const onFileUpload = () => {
+    if (uploadedFile === null) return;
+  
+    Array.from(uploadedFile).forEach(async file => {  
+    const fileRef = ref(storage, `/${data.id}/${file.name}`)
+    uploadBytes(fileRef, file)
+    });
+  }
+
+
 
   return (
     <div>
@@ -88,6 +93,7 @@ const TodoCard = ({ data, id }) => {
                     name: data.name,
                     desc: data.desc,
                     date: data.date,
+                    id: data.id,
                   });
                 }}
               />
@@ -98,13 +104,7 @@ const TodoCard = ({ data, id }) => {
             </div>
             <p className="Desc">{data.desc}</p>
             <div className='Files'>
-            {/* {data.files.map((file) => {
-              const fileRef = ref(storage, file)
-              getDownloadURL(fileRef).then((url) => {
-              console.log(url);
-             });
-            })} */}
-            {ListAll(id)}
+              {files.map(f => <a {...f} target="_blank" key={f.href}/>)}
             </div>
           </div>
           <div className="Actions">
@@ -156,6 +156,10 @@ const TodoCard = ({ data, id }) => {
                 onChange={e => setDesc(e.currentTarget.value)}
                 required
               />
+            <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
+            <div className='Files'>
+              {files.map(f => <div className='FileDelete' key={f.href}><a {...f} target="_blank" /><button type="button" className='DeleteIcon' onClick={() => handleFileDelete(f.children)}><IconX /></button></div>)}
+            </div>
             </div>
             <div className="Actions">
               <button type="submit" className="Save">

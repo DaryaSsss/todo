@@ -15,7 +15,6 @@ const Home = () => {
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState('');
   const [uploadedFile, setUploadedFile] = useState([])
-  const [files, setFiles] = useState([])
 
 
   const refTodos = collection(firestore, 'todos');
@@ -24,24 +23,14 @@ const Home = () => {
   const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
 
   const handleTodo = async e => {
-    // const ID = generatePushID();
     const ID = generatePushID();
     onFileUpload({ID});
     e.preventDefault();
-
-    // files.map((file) => {
-    //   console.log(file)
-    //   const fileRef = ref(storage, file)
-    //   getDownloadURL(fileRef).then((url) => {
-    //     filesUrls.push(url)
-    //   });
-    // })
     mutationCreateTodo.mutate({
       name,
       desc,
       date,
       isDone: false,
-      files,
       id:ID
     });
     await firestoreQuery.refetch();
@@ -51,13 +40,8 @@ const Home = () => {
     if (uploadedFile === null) return;
   
     Array.from(uploadedFile).forEach(async file => {  
-    const fileRef = ref(storage, `/${ID}/${file.name + new Date()}`)
+    const fileRef = ref(storage, `/${ID}/${file.name}`)
     uploadBytes(fileRef, file)
-    setFiles(current => [...current, fileRef.fullPath])
-    
-    // getDownloadURL(fileRef).then((url) => {
-    //   console.log(url);
-    //   });
     });
   }
 
@@ -91,7 +75,6 @@ const Home = () => {
               required
             />
             <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
-            {/* <button type='button' onClick={onFileUpload}>Uppload file</button> */}
             <button type="submit" disabled={mutationCreateTodo.isLoading}>
               Save to-do
             </button>
