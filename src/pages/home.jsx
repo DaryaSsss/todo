@@ -18,7 +18,6 @@ const Home = () => {
 
 
   const refTodos = collection(firestore, 'todos');
-
   const firestoreQuery = useFirestoreQuery(['todos'], refTodos);
   const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
 
@@ -84,7 +83,8 @@ const Home = () => {
           {firestoreQuery.isLoading ? (
             <div>Loading...</div>
           ) : (
-            <Todos todos={firestoreQuery.data} />
+            firestoreQuery.data.empty ?
+            (<div className='NoTodos'>No todos</div>) : (<Todos todos={firestoreQuery.data} />)
           )}
         </div>
       </div>

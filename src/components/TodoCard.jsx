@@ -11,19 +11,25 @@ import { ref, getDownloadURL, listAll, deleteObject,uploadBytes } from "firebase
 import { IconX } from '@tabler/icons';
 
 
-const TodoCard = ({ data, id }) => {
-  const deleteFrom = collection(firestore, 'todos');
-  const refDelete = doc(deleteFrom, id);
-  const mutationDeleteTodo = useFirestoreDocumentDeletion(refDelete);
-
+const TodoCard = ({ data, id }) => { 
   const [type, setType] = useState('view');
-
   const [name, setName] = useState(data.name);
   const [desc, setDesc] = useState(data.desc);
   const [date, setDate] = useState(data.date);
   const [isDone, setIsDone] = useState(data.isDone);
+  const [files, setFiles] = useState([])
   const [uploadedFile, setUploadedFile] = useState([])
 
+  const deleteFrom = collection(firestore, 'todos');
+  const refDelete = doc(deleteFrom, id);
+  const mutationDeleteTodo = useFirestoreDocumentDeletion(refDelete);
+
+  const handleDelete = () => {
+    mutationDeleteTodo.mutate()
+    files.map((file) => {
+      handleFileDelete(file.children)
+    })
+  }
 
   const updateWhere = collection(firestore, 'todos');
   const refUpdate = doc(updateWhere, id);
@@ -42,8 +48,6 @@ const TodoCard = ({ data, id }) => {
     setType('view');
   };
 
-  const [files, setFiles] = useState([])
-
   useEffect(() => {
     const getFiles = async () => {
       const returnList = []
@@ -60,8 +64,7 @@ const TodoCard = ({ data, id }) => {
 
   const handleFileDelete = (fileName) => {
     const fileRef = ref(storage, `${data.id}/${fileName}`);
-    deleteObject(fileRef)
-  }
+    deleteObject(fileRef)  }
 
 
   const onFileUpload = () => {
@@ -70,8 +73,7 @@ const TodoCard = ({ data, id }) => {
     Array.from(uploadedFile).forEach(async file => {  
     const fileRef = ref(storage, `/${data.id}/${file.name}`)
     uploadBytes(fileRef, file)
-    });
-  }
+    });  }
 
   const updateIsDone = () => {
     const newIsDone = !isDone
@@ -112,9 +114,7 @@ const TodoCard = ({ data, id }) => {
               type="button"
               className="Delete"
               disabled={mutationDeleteTodo.isLoading}
-              onClick={() => {
-                mutationDeleteTodo.mutate();
-              }}
+              onClick={handleDelete}
             >
               Delete
             </button>
