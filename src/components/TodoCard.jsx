@@ -63,7 +63,6 @@ const TodoCard = ({ data, id }) => {
     deleteObject(fileRef)
   }
 
-  console.log(data.id, id)
 
   const onFileUpload = () => {
     if (uploadedFile === null) return;
@@ -74,6 +73,17 @@ const TodoCard = ({ data, id }) => {
     });
   }
 
+  const updateIsDone = () => {
+    const newIsDone = !isDone
+    setIsDone(newIsDone)
+    mutationUpdateTodo.mutate({
+      isDone: newIsDone,
+      name: data.name,
+      desc: data.desc,
+      date: data.date,
+      id: data.id,
+    });
+  }
 
 
   return (
@@ -85,17 +95,7 @@ const TodoCard = ({ data, id }) => {
               <input
                 type="checkbox"
                 checked={isDone}
-                onChange={() => {
-                  const newIsDone = !isDone
-                  setIsDone(newIsDone)
-                  mutationUpdateTodo.mutate({
-                    isDone: newIsDone,
-                    name: data.name,
-                    desc: data.desc,
-                    date: data.date,
-                    id: data.id,
-                  });
-                }}
+                onChange={updateIsDone}
               />
               <p className={!isDone ? 'Name' : 'Name Done'}>{data.name}</p>
               <p className={!isDayExpired(data.date) ? 'Date' : 'Date Expired'}>
