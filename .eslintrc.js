@@ -22,7 +22,9 @@ module.exports = {
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'react/forbid-prop-types': [0, { forbid: ['any'] }],
-    'react/prop-types': 0,
+    'react/prop-types': "off",
+    "react/react-in-jsx-scope": "off",
+   "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
   },
   env: {
     jest: true,
