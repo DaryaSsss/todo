@@ -24,6 +24,11 @@ const TodoCard = ({ data, id }) => {
   const refDelete = doc(deleteFrom, id);
   const mutationDeleteTodo = useFirestoreDocumentDeletion(refDelete);
 
+  const updateWhere = collection(firestore, 'todos');
+  const refUpdate = doc(updateWhere, id);
+  const mutationUpdateTodo = useFirestoreDocumentMutation(refUpdate);
+
+  /** function to delete todo with all todo files */
   const handleDelete = () => {
     mutationDeleteTodo.mutate()
     files.map((file) => {
@@ -31,10 +36,7 @@ const TodoCard = ({ data, id }) => {
     })
   }
 
-  const updateWhere = collection(firestore, 'todos');
-  const refUpdate = doc(updateWhere, id);
-  const mutationUpdateTodo = useFirestoreDocumentMutation(refUpdate);
-
+  /** function to update todo info (besides info about its completion) */
   const handleTodo = async e => {
     e.preventDefault();
     onFileUpload()
@@ -48,6 +50,9 @@ const TodoCard = ({ data, id }) => {
     setType('view');
   };
 
+  /** function to get files for every todo 
+   * @returns { any[] } - return array of all files by setting them in files (useState - setFiles)
+  */
   useEffect(() => {
     const getFiles = async () => {
       const returnList = []
@@ -62,14 +67,17 @@ const TodoCard = ({ data, id }) => {
     getFiles()
   }, [])
 
+  /** function to delete file from storage 
+   * @param { any } fileName - name of file to delete
+  */
   const handleFileDelete = (fileName) => {
     const fileRef = ref(storage, `${data.fileId}/${fileName}`);
     deleteObject(fileRef);
     setFiles(prev => prev.filter(file => file.children !== fileName))
   }
 
-
-  const onFileUpload = async () => {
+    /** function to upload files to storage */
+    const onFileUpload = async () => {
     if (uploadedFile === null) return;
 
     for (const file of Array.from(uploadedFile)) {
@@ -78,6 +86,7 @@ const TodoCard = ({ data, id }) => {
     } 
    }
 
+   /** function to update info about todo completion (checkbox) */
   const updateIsDone = () => {
     const newIsDone = !isDone
     setIsDone(newIsDone)
