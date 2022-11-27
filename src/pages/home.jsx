@@ -15,13 +15,14 @@ const Home = () => {
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState('');
   const [uploadedFile, setUploadedFile] = useState([])
-
-
-  const refTodos = collection(firestore, 'todos');
-  const firestoreQuery = useFirestoreQuery(['todos'], refTodos);
-  const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
   const [allTodos, setAllTodos] = useState([])
 
+  const refTodos = collection(firestore, 'todos');
+  const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
+
+  /** function to get reactive list of all todos 
+   * @returns { any[] } - return array of all todos by setting them in allTodos (useState - setAllTodos)
+  */
   useEffect(() => {
     const q = query(collection(firestore, "todos"));
     onSnapshot(q, (querySnapshot) => {
@@ -40,7 +41,8 @@ const Home = () => {
       setAllTodos(todos)
     });    
   }, [])
-
+  
+  /** function to create a new todo */
   const handleTodo = async e => {
     const ID = generatePushID();
     e.preventDefault();
@@ -54,6 +56,9 @@ const Home = () => {
     });
   };
 
+  /** function to upload files in storage 
+   * @param { string } ID - fileId from todo document, used to name storage folder for todo files
+  */
   const onFileUpload = async ({ID}) => {
     if (uploadedFile === null) return;
 
