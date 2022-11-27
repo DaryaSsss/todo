@@ -19,6 +19,7 @@ const TodoCard = ({ data, id }) => {
   const [isDone, setIsDone] = useState(data.isDone);
   const [files, setFiles] = useState([])
   const [uploadedFile, setUploadedFile] = useState([])
+  console.log("data", data, "id", id)
 
   const deleteFrom = collection(firestore, 'todos');
   const refDelete = doc(deleteFrom, id);
@@ -43,7 +44,7 @@ const TodoCard = ({ data, id }) => {
       name,
       desc,
       date,
-      id: data.id,
+      fileId: data.fileId,
     });
     setType('view');
   };
@@ -51,7 +52,7 @@ const TodoCard = ({ data, id }) => {
   useEffect(() => {
     const getFiles = async () => {
       const returnList = []
-      const listRef = ref(storage, data.id);
+      const listRef = ref(storage, data.fileId);
       const response = await listAll(listRef)
       for (const itemRef of response.items) {
         const url = await getDownloadURL(itemRef)
@@ -63,15 +64,15 @@ const TodoCard = ({ data, id }) => {
   }, [])
 
   const handleFileDelete = (fileName) => {
-    const fileRef = ref(storage, `${data.id}/${fileName}`);
-    deleteObject(fileRef)  }
+    const fileRef = ref(storage, `${data.fileId}/${fileName}`);
+    deleteObject(fileRef)}
 
 
   const onFileUpload = () => {
     if (uploadedFile === null) return;
   
     Array.from(uploadedFile).forEach(async file => {  
-    const fileRef = ref(storage, `/${data.id}/${file.name}`)
+    const fileRef = ref(storage, `/${data.fileId}/${file.name}`)
     uploadBytes(fileRef, file)
     });  }
 
@@ -83,7 +84,7 @@ const TodoCard = ({ data, id }) => {
       name: data.name,
       desc: data.desc,
       date: data.date,
-      id: data.id,
+      fileId: data.fileId,
     });
   }
 

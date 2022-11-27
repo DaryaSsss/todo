@@ -2,8 +2,8 @@ import {
   useFirestoreCollectionMutation,
   useFirestoreQuery,
 } from '@react-query-firebase/firestore';
-import { collection } from 'firebase/firestore';
-import { useState } from 'react';
+import { collection, query , onSnapshot} from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import Todos from '../components/Todos';
 import { firestore, storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -20,19 +20,39 @@ const Home = () => {
   const refTodos = collection(firestore, 'todos');
   const firestoreQuery = useFirestoreQuery(['todos'], refTodos);
   const mutationCreateTodo = useFirestoreCollectionMutation(refTodos);
+  const [allTodos, setAllTodos] = useState([])
+
+  useEffect(() => {
+    const q = query(collection(firestore, "todos"));
+    onSnapshot(q, (querySnapshot) => {
+      const todos = [];
+      querySnapshot.forEach((doc) => {
+        const todo = {
+          id: doc.id,
+          name: doc.data().name,
+          desc: doc.data().desc,
+          date: doc.data().date,
+          isDone: doc.data().isDone,
+          fileId: doc.data().fileId,
+        }
+          todos.push(todo);
+      });
+      console.log(todos)
+      setAllTodos(todos)
+    });    
+  }, [])
 
   const handleTodo = async e => {
     const ID = generatePushID();
-    onFileUpload({ID});
     e.preventDefault();
-    mutationCreateTodo.mutate({
+    onFileUpload({ID});
+    await mutationCreateTodo.mutate({
       name,
       desc,
       date,
       isDone: false,
-      id:ID
+      fileId: ID,
     });
-    await firestoreQuery.refetch();
   };
 
   const onFileUpload = ({ID}) => {
@@ -40,7 +60,7 @@ const Home = () => {
   
     Array.from(uploadedFile).forEach(async file => {  
     const fileRef = ref(storage, `/${ID}/${file.name}`)
-    uploadBytes(fileRef, file)
+    await uploadBytes(fileRef, file)
     });
   }
 
@@ -55,6 +75,7 @@ const Home = () => {
             <input
               type="text"
               maxLength={32}
+              placeholder="Finish test"
               value={name}
               onChange={e => setName(e.currentTarget.value)}
               required
@@ -63,6 +84,7 @@ const Home = () => {
             <textarea
               rows={5}
               value={desc}
+              placeholder="Finish test for work"
               onChange={e => setDesc(e.currentTarget.value)}
               required
             />
@@ -80,11 +102,11 @@ const Home = () => {
           </div>
         </form>
         <div>
-          {firestoreQuery.isLoading ? (
+          {allTodos.isLoading ? (
             <div>Loading...</div>
           ) : (
-            firestoreQuery.data.empty ?
-            (<div className='NoTodos'>No todos</div>) : (<Todos todos={firestoreQuery.data} />)
+            allTodos.length === 0 ?
+            (<div className='NoTodos'>No todos</div>) : (<Todos todos={allTodos} />)
           )}
         </div>
       </div>
