@@ -6,7 +6,7 @@ import { collection, query , onSnapshot} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Todos from '../components/Todos';
 import { firestore, storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes } from "firebase/storage";
 import { generatePushID } from '../helpers';
 
 
@@ -37,7 +37,6 @@ const Home = () => {
         }
           todos.push(todo);
       });
-      console.log(todos)
       setAllTodos(todos)
     });    
   }, [])
@@ -45,7 +44,7 @@ const Home = () => {
   const handleTodo = async e => {
     const ID = generatePushID();
     e.preventDefault();
-    onFileUpload({ID});
+    await onFileUpload({ID});
     await mutationCreateTodo.mutate({
       name,
       desc,
@@ -55,13 +54,13 @@ const Home = () => {
     });
   };
 
-  const onFileUpload = ({ID}) => {
+  const onFileUpload = async ({ID}) => {
     if (uploadedFile === null) return;
-  
-    Array.from(uploadedFile).forEach(async file => {  
-    const fileRef = ref(storage, `/${ID}/${file.name}`)
-    await uploadBytes(fileRef, file)
-    });
+
+    for (const file of Array.from(uploadedFile)) {
+      const fileRef = ref(storage, `/${ID}/${file.name}`)
+      await uploadBytes(fileRef, file)
+    }
   }
 
   return (

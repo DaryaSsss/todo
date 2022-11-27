@@ -4,7 +4,7 @@ import {
   useFirestoreDocumentMutation,
 } from '@react-query-firebase/firestore';
 import { collection, doc } from 'firebase/firestore';
-import { useReducer, useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { isDayExpired } from '../helpers';
 import { firestore, storage } from '../firebase';
 import { ref, getDownloadURL, listAll, deleteObject,uploadBytes } from "firebase/storage";
@@ -19,7 +19,6 @@ const TodoCard = ({ data, id }) => {
   const [isDone, setIsDone] = useState(data.isDone);
   const [files, setFiles] = useState([])
   const [uploadedFile, setUploadedFile] = useState([])
-  console.log("data", data, "id", id)
 
   const deleteFrom = collection(firestore, 'todos');
   const refDelete = doc(deleteFrom, id);
@@ -65,16 +64,19 @@ const TodoCard = ({ data, id }) => {
 
   const handleFileDelete = (fileName) => {
     const fileRef = ref(storage, `${data.fileId}/${fileName}`);
-    deleteObject(fileRef)}
+    deleteObject(fileRef);
+    setFiles(prev => prev.filter(file => file.children !== fileName))
+  }
 
 
-  const onFileUpload = () => {
+  const onFileUpload = async () => {
     if (uploadedFile === null) return;
-  
-    Array.from(uploadedFile).forEach(async file => {  
-    const fileRef = ref(storage, `/${data.fileId}/${file.name}`)
-    uploadBytes(fileRef, file)
-    });  }
+
+    for (const file of Array.from(uploadedFile)) {
+      const fileRef = ref(storage, `/${data.fileId}/${file.name}`)
+      await uploadBytes(fileRef, file)
+    } 
+   }
 
   const updateIsDone = () => {
     const newIsDone = !isDone
