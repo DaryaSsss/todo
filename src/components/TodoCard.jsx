@@ -19,6 +19,7 @@ const TodoCard = ({ data, id }) => {
   const [isDone, setIsDone] = useState(data.isDone);
   const [files, setFiles] = useState([])
   const [uploadedFile, setUploadedFile] = useState([])
+  const [refetchFiles, setRefetchFiles] = useState(true)
 
   const deleteFrom = collection(firestore, 'todos');
   const refDelete = doc(deleteFrom, id);
@@ -27,6 +28,8 @@ const TodoCard = ({ data, id }) => {
   const updateWhere = collection(firestore, 'todos');
   const refUpdate = doc(updateWhere, id);
   const mutationUpdateTodo = useFirestoreDocumentMutation(refUpdate);
+
+  useEffect(() => { console.log(files) }, [files])
 
   /** function to delete todo with all todo files */
   const handleDelete = () => {
@@ -48,6 +51,7 @@ const TodoCard = ({ data, id }) => {
       fileId: data.fileId,
     });
     setType('view');
+    setUploadedFile([])
   };
 
   /** function to get files for every todo 
@@ -70,21 +74,26 @@ const TodoCard = ({ data, id }) => {
   /** function to delete file from storage 
    * @param { any } fileName - name of file to delete
   */
-  const handleFileDelete = (fileName) => {
+  const handleFileDelete = async (fileName) => {
     const fileRef = ref(storage, `${data.fileId}/${fileName}`);
-    deleteObject(fileRef);
+    await deleteObject(fileRef);
     setFiles(prev => prev.filter(file => file.children !== fileName))
   }
 
-    /** function to upload files to storage */
-    const onFileUpload = async () => {
-    if (uploadedFile === null) return;
+  /** function to upload files to storage */
+  const onFileUpload = async () => {
+  if (uploadedFile === null) return;
+
 
     for (const file of Array.from(uploadedFile)) {
       const fileRef = ref(storage, `/${data.fileId}/${file.name}`)
       await uploadBytes(fileRef, file)
+      const newFile = { children: file.name, href: await getDownloadURL(fileRef) }
+      setFiles(prev => [...prev, newFile])
     } 
-   }
+      // const newRefetchFiles = !refetchFiles
+      // setRefetchFiles(newRefetchFiles)
+  }
 
    /** function to update info about todo completion (checkbox) */
   const updateIsDone = () => {
