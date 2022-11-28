@@ -1,4 +1,32 @@
-import dayjs from 'dayjs';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: TodoCard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: TodoCard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import dayjs from 'dayjs';
 import {
   useFirestoreDocumentDeletion,
   useFirestoreDocumentMutation,
@@ -111,51 +139,51 @@ const TodoCard = ({ data, id }) => {
 
 
   return (
-    <div>
+    &lt;div>
       {type === 'view' ? (
-        <div className="Card">
-          <div className="Info">
-            <div className="CardHeader">
-              <input
+        &lt;div className="Card">
+          &lt;div className="Info">
+            &lt;div className="CardHeader">
+              &lt;input
                 type="checkbox"
                 checked={isDone}
                 onChange={updateIsDone}
               />
-              <p className={!isDone ? 'Name' : 'Name Done'}>{data.name}</p>
-              <p className={!isDayExpired(data.date) ? 'Date' : 'Date Expired'}>
+              &lt;p className={!isDone ? 'Name' : 'Name Done'}>{data.name}&lt;/p>
+              &lt;p className={!isDayExpired(data.date) ? 'Date' : 'Date Expired'}>
                 {dayjs(data.date).format('DD/MM/YYYY')}
-              </p>
-            </div>
-            <p className="Desc">{data.desc}</p>
-            <div className='Files'>
-              {files.map(f => <a {...f} target="_blank" key={f.href}/>)}
-            </div>
-          </div>
-          <div className="Actions">
-            <button
+              &lt;/p>
+            &lt;/div>
+            &lt;p className="Desc">{data.desc}&lt;/p>
+            &lt;div className='Files'>
+              {files.map(f => &lt;a {...f} target="_blank" key={f.href}/>)}
+            &lt;/div>
+          &lt;/div>
+          &lt;div className="Actions">
+            &lt;button
               type="button"
               className="Delete"
               disabled={mutationDeleteTodo.isLoading}
               onClick={handleDelete}
             >
               Delete
-            </button>
-            <button
+            &lt;/button>
+            &lt;button
               type="button"
               onClick={() => {
                 setType('edit');
               }}
             >
               Edit
-            </button>
-          </div>
-        </div>
+            &lt;/button>
+          &lt;/div>
+        &lt;/div>
       ) : (
-        <form onSubmit={handleTodo}>
-          <div className="Card">
-            <div className="Info">
-              <div className="CardHeader">
-                <input
+        &lt;form onSubmit={handleTodo}>
+          &lt;div className="Card">
+            &lt;div className="Info">
+              &lt;div className="CardHeader">
+                &lt;input
                   type="text"
                   maxLength={32}
                   value={name}
@@ -163,43 +191,66 @@ const TodoCard = ({ data, id }) => {
                   onChange={e => setName(e.currentTarget.value)}
                   required
                 />
-                <input
+                &lt;input
                   type="date"
                   value={date}
                   placeholder="Date"
                   onChange={e => setDate(e.currentTarget.value)}
                   required
                 />
-              </div>
-              <textarea
+              &lt;/div>
+              &lt;textarea
                 rows={5}
                 value={desc}
                 placeholder="Description"
                 onChange={e => setDesc(e.currentTarget.value)}
                 required
               />
-            <input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
-            <div className='Files'>
-              {files.map(f => <div className='FileDelete' key={f.href}><a {...f} target="_blank" /><button type="button" className='DeleteIcon' onClick={() => handleFileDelete(f.children)}><IconX /></button></div>)}
-            </div>
-            </div>
-            <div className="Actions">
-              <button type="submit" className="Save">
+            &lt;input type="file" multiple onChange={(e) => setUploadedFile(e.target.files)} />
+            &lt;div className='Files'>
+              {files.map(f => &lt;div className='FileDelete' key={f.href}>&lt;a {...f} target="_blank" />&lt;button type="button" className='DeleteIcon' onClick={() => handleFileDelete(f.children)}>&lt;IconX />&lt;/button>&lt;/div>)}
+            &lt;/div>
+            &lt;/div>
+            &lt;div className="Actions">
+              &lt;button type="submit" className="Save">
                 Save
-              </button>
-              <button
+              &lt;/button>
+              &lt;button
                 type="button"
                 onClick={() => {
                   setType('view');
                 }}
               >
                 Close
-              </button>
-            </div>
-          </div>
-        </form>
+              &lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/form>
       )}
-    </div>
+    &lt;/div>
   );
 };
 export default TodoCard;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="component%2520for%2520one%2520todo%2520with%2520functions%2520to%2520delete%2520and%2520update%2520todo,%2520delete,module_%2520update%2520and%2520add%2520filess.html"> update and add filess</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.0</a> on Mon Nov 28 2022 19:48:56 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

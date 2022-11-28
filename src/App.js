@@ -3,6 +3,9 @@ import './App.less';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import Home from './pages/home';
 
+/**
+ * @module function with queryClient to render Home  */
+
 function App() {
   const queryClient = new QueryClient();
   return (

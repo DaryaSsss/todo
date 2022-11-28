@@ -1,6 +1,7 @@
 import TodoCard from "./TodoCard";
 
-/** component maping all todos with todo cards
+/** 
+ * @module component maping all todos with todo cards
  * @param { any } todos - array of todos from firestore
  */
 
